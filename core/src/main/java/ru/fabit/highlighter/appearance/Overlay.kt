@@ -27,7 +27,7 @@ import ru.fabit.highlighter.internal.log
 
 class Overlay(context: Context) : RelativeLayout(context) {
     private val size: PointF = (context as Activity).windowManager.getDisplaySize()
-    private val backgroundColor = ContextCompat.getColor(context, R.color.overlay_background)
+    private val backgroundColor = ContextCompat.getColor(context, R.color.highlighter_overlay_background)
     private val paintBackground = Paint().apply {
         color = backgroundColor
     }

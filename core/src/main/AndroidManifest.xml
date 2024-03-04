@@ -4,6 +4,6 @@
     <application>
         <activity
             android:name=".internal.Dummy"
-            android:theme="@style/Theme.Transparent" />
+            android:theme="@style/Highlighter.Transparent" />
     </application>
 </manifest>
