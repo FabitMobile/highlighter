@@ -2,7 +2,6 @@ package ru.fabit.highlighter.appearance
 
 import android.app.Activity
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.PointF
@@ -24,11 +23,13 @@ import ru.fabit.highlighter.Highlighter
 import ru.fabit.highlighter.R
 import ru.fabit.highlighter.internal.afterMeasured
 import ru.fabit.highlighter.internal.getDisplaySize
+import ru.fabit.highlighter.internal.log
 
 class Overlay(context: Context) : RelativeLayout(context) {
     private val size: PointF = (context as Activity).windowManager.getDisplaySize()
+    private val backgroundColor = ContextCompat.getColor(context, R.color.overlay_background)
     private val paintBackground = Paint().apply {
-        color = ContextCompat.getColor(context, R.color.overlay_background)
+        color = backgroundColor
     }
     private val paintClear = Paint().apply {
         xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR)
@@ -63,6 +64,7 @@ class Overlay(context: Context) : RelativeLayout(context) {
                     ClickResult.highlightedElement
                 else
                     ClickResult.overlay
+                log("ClickResult $click")
                 listener?.invoke(click)
                 onClose()
                 v.performClick()
@@ -109,7 +111,7 @@ class Overlay(context: Context) : RelativeLayout(context) {
             .getInsets(WindowInsetsCompat.Type.statusBars() or WindowInsetsCompat.Type.navigationBars())
         topInset = insets.top.toFloat()
         bottomInset = insets.bottom.toFloat()
-
+        (context as Activity).window.statusBarColor = backgroundColor
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -121,14 +123,4 @@ class Overlay(context: Context) : RelativeLayout(context) {
             canvas.drawRoundRect(pos, it.cornerRadius, it.cornerRadius, paintClear)
         }
     }
-}
-
-fun getBitmapFromView(view: View, defaultColor: Int): Bitmap {
-    val bitmap = Bitmap.createBitmap(
-        view.width, view.height, Bitmap.Config.ARGB_8888
-    )
-    val canvas = Canvas(bitmap)
-    canvas.drawColor(defaultColor)
-    view.draw(canvas)
-    return bitmap
 }

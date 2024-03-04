@@ -11,7 +11,7 @@ data class Element(
     val cornerRadius: Float = 0f
 )
 
-fun View.toElement(cornerRadiusDp: Float? = null): Element {
+fun View.toElement(cornerRadius: Float? = null): Element {
     val pos = IntArray(2)
     getLocationOnScreen(pos)
     val w = measuredWidth
@@ -25,6 +25,10 @@ fun View.toElement(cornerRadiusDp: Float? = null): Element {
     return Element(
         context,
         Rect(pos[0], pos[1], pos[0] + w, pos[1] + h),
-        cornerRadiusDp ?: radius ?: 0f
+        cornerRadius ?: radius ?: 0f
     )
+}
+
+fun <T : View> T.toElement(cornerRadius: T.() -> Float): Element {
+    return this.toElement(cornerRadius())
 }

@@ -12,7 +12,13 @@ import ru.fabit.highlighter.internal.Dummy
 import ru.fabit.highlighter.internal.log
 
 fun highlight(element: Element): Highlighter {
-    return Highlighter.newInstance(element)
+    return Highlighter.newInstance(element).also {
+        element.context.startActivity(
+            Intent(element.context, Dummy::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+        )
+    }
 }
 
 fun highlight(view: View): Highlighter {
@@ -23,7 +29,7 @@ class Highlighter private constructor(
     private val element: Element
 ) {
     companion object {
-        var DEBUG = true
+        var DEBUG = false
 
         var overrideTransitions: Activity.() -> Unit = {
             if (Build.VERSION.SDK_INT >= 34) {
@@ -56,12 +62,8 @@ class Highlighter private constructor(
             instance?.bind(activity)
         }
 
-        internal fun setTheme(activity: Activity) {
-            instance?.setTheme(activity)
-        }
-
         internal fun onClose(context: Context) {
-            if (context is Dummy) {
+            if (context is Activity) {
                 context.finish()
                 instance = null
             }
@@ -71,14 +73,8 @@ class Highlighter private constructor(
     private var note: ExplanatoryNote? = null
 
     infix fun with(note: ExplanatoryNote) {
-        log("Asked for permissions ${note} ")
+        log("highlight with note $note ")
         this.note = note
-
-        element.context.startActivity(
-            Intent(element.context, Dummy::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-        )
     }
 
     private fun setTheme(activity: Activity) {
@@ -91,7 +87,9 @@ class Highlighter private constructor(
     private fun bind(activity: Activity) {
         val root = Overlay(activity)
         root.highlight(element)
-        note?.init(root)
+        root.setOnClickListener(null as? ClickListener)
         activity.setContentView(root)
+        setTheme(activity)
+        note?.init(root)
     }
 }

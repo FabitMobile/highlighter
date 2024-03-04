@@ -25,10 +25,15 @@ open class ExplanatoryNote(
 
         parent.findViewById<View>(R.id.button_close)?.setOnClickListener {
             parent.onClose()
+            log("ClickResult ${ClickResult.closeButton}")
             onClickListener?.invoke(ClickResult.closeButton)
         }
             ?: log("Close button not found")
 
         parent.setOnClickListener(onClickListener)
+    }
+
+    override fun toString(): String {
+        return "ExplanatoryNote(info=$info, layoutResId=$layoutResId, themeResId=$themeResId)"
     }
 }
