@@ -14,7 +14,7 @@ open class ExplanatoryNote(
 ) {
     protected open val layoutResId: Int = R.layout.explanatory_note
 
-    open val themeResId: Int = R.style.Theme_Transparent
+    open val themeResId: Int = R.style.Highlighter_Transparent
 
     open fun init(parent: Overlay) {
         LayoutInflater.from(parent.context).inflate(layoutResId, parent)
