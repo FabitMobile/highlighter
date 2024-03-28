@@ -9,13 +9,17 @@ internal class Dummy : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        Highlighter.bind(this)
         log("Dummy_${hashCode()} created")
+        bindOrExit(intent)
     }
 
     override fun onNewIntent(intent: Intent?) {
         log("Dummy_${hashCode()} onNewIntent")
         super.onNewIntent(intent)
+        bindOrExit(intent)
+    }
+
+    private fun bindOrExit(intent: Intent?) {
         if (intent?.getBooleanExtra(EXIT_FLAG, false) == true) {
             log("Dummy_${hashCode()} finish with intent")
             Highlighter.onClose(this, withIntent = true)

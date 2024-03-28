@@ -30,7 +30,7 @@ fun highlight(view: View): Highlighter {
 }
 
 fun cancelHighlight(context: Context) {
-    context.startActivity(Highlighter.cancelIntent(context))
+    Highlighter.cancel(context)
 }
 
 class Highlighter private constructor(
@@ -63,6 +63,11 @@ class Highlighter private constructor(
         fun cancelIntent(context: Context) = Intent(context, Dummy::class.java).apply {
             addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
             putExtra(Dummy.EXIT_FLAG, true)
+        }
+
+        fun cancel(context: Context) {
+            if (instance != null)
+                context.startActivity(cancelIntent(context))
         }
 
         internal fun newInstance(element: Element): Highlighter {
