@@ -4,11 +4,15 @@ import android.graphics.RenderEffect
 import android.graphics.Shader
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import ru.fabit.highlighter.appearance.ExplanatoryNote
+import ru.fabit.highlighter.cancelHighlight
 import ru.fabit.highlighter.highlight
+import kotlin.time.Duration.Companion.seconds
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,12 +24,64 @@ class MainActivity : AppCompatActivity() {
 
 
         button.setOnClickListener {
-            applyBlur()
-            highlight(button) with ExplanatoryNote {
-                text.text = "showed $it"
-                removeBlur()
-            }
+            highlightButtonAndThenCancel(button, text)
         }
+    }
+
+    fun highlightButton(button: View, text: TextView) {
+        applyBlur()
+        highlight(button) with ExplanatoryNote {
+            text.text = "showed $it"
+            removeBlur()
+        }
+    }
+
+    fun highlightButtonAndThenCancel(button: View, text: TextView) {
+        applyBlur()
+        highlight(button) with ExplanatoryNote {
+            text.text = "showed $it"
+            removeBlur()
+        }
+        Handler(Looper.getMainLooper()).postDelayed({
+            removeBlur()
+            cancelHighlight(this)
+        }, 5000)
+    }
+
+    fun highlightButtonAfterSecond(button: View, text: TextView) {
+        applyBlur()
+        highlight(button) after 1.seconds with ExplanatoryNote {
+            text.text = "showed $it"
+            removeBlur()
+        }
+    }
+
+    fun highlightButtonAndThenText(button: View, text: TextView) {
+        applyBlur()
+        highlight(button) with ExplanatoryNote {
+            text.text = "showed $it"
+            removeBlur()
+        }
+        Handler(Looper.getMainLooper()).postDelayed({
+            removeBlur()
+            highlight(text) with ExplanatoryNote {
+                text.text = "showed $it"
+            }
+        }, 5000)
+    }
+
+    fun highlightButtonAfterSecondAndThenText(button: View, text: TextView) {
+        applyBlur()
+        highlight(button) after 1.seconds with ExplanatoryNote {
+            text.text = "showed $it"
+            removeBlur()
+        }
+        Handler(Looper.getMainLooper()).postDelayed({
+            removeBlur()
+            highlight(text) with ExplanatoryNote {
+                text.text = "showed $it"
+            }
+        }, 5000)
     }
 
     fun applyBlur() {

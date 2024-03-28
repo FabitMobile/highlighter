@@ -10,7 +10,7 @@ import ru.fabit.highlighter.internal.log
 
 open class ExplanatoryNote(
     protected open val info: String? = null,
-    protected open val onClickListener: ClickListener? = null
+    open val onClickListener: ClickListener? = null
 ) {
     protected open val layoutResId: Int = R.layout.explanatory_note
 
