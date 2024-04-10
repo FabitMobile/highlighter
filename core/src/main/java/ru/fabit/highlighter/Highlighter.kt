@@ -62,6 +62,7 @@ class Highlighter private constructor(
 
         fun cancelIntent(context: Context) = Intent(context, Dummy::class.java).apply {
             addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             putExtra(Dummy.EXIT_FLAG, true)
         }
 
