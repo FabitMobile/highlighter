@@ -15,4 +15,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "highlighter"
 include(":core")
-//include(":sample")
+include(":sample")

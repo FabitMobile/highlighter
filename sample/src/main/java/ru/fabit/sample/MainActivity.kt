@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.View
+import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import ru.fabit.highlighter.appearance.ExplanatoryNote
@@ -22,15 +23,14 @@ class MainActivity : AppCompatActivity() {
         val text = findViewById<TextView>(R.id.textView)
         val button = findViewById<View>(R.id.button)
 
-
         button.setOnClickListener {
-            highlightButtonAndThenCancel(button, text)
+            highlightButton(button, text)
         }
     }
 
     fun highlightButton(button: View, text: TextView) {
         applyBlur()
-        highlight(button) with ExplanatoryNote {
+        highlight(button) with TestExplanatoryNote {
             text.text = "showed $it"
             removeBlur()
         }
@@ -86,7 +86,7 @@ class MainActivity : AppCompatActivity() {
 
     fun applyBlur() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            window.decorView.setRenderEffect(
+            (window.decorView as ViewGroup).getChildAt(0).setRenderEffect(
                 RenderEffect.createBlurEffect(
                     5f,
                     5f,
@@ -98,7 +98,7 @@ class MainActivity : AppCompatActivity() {
 
     fun removeBlur() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            window.decorView.setRenderEffect(null)
+            (window.decorView as ViewGroup).getChildAt(0).setRenderEffect(null)
         }
     }
 }

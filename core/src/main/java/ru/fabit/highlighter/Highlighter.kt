@@ -2,133 +2,104 @@ package ru.fabit.highlighter
 
 import android.app.Activity
 import android.content.Context
-import android.content.Intent
-import android.os.Build
 import android.os.Handler
 import android.os.Looper
-import android.view.View
-import androidx.appcompat.app.AppCompatActivity
+import android.view.ViewGroup
 import ru.fabit.highlighter.appearance.ExplanatoryNote
-import ru.fabit.highlighter.appearance.Overlay
 import ru.fabit.highlighter.internal.Dummy
 import ru.fabit.highlighter.internal.log
 import kotlin.time.Duration
 
-fun highlight(element: Element): Highlighter {
-    return Highlighter.newInstance(element).also {
-        element.context.startActivity(
-            Intent(element.context, Dummy::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-            }
-        )
-    }
-}
-
-fun highlight(view: View): Highlighter {
-    return highlight(view.toElement())
-}
-
-fun cancelHighlight(context: Context) {
-    Highlighter.cancel(context)
-}
-
-class Highlighter private constructor(
-    private val element: Element
+sealed class Highlighter(
+    protected val element: Element
 ) {
-    companion object {
-        var DEBUG = false
+    protected var note: ExplanatoryNote? = null
+    protected var delay: Duration? = null
 
-        var overrideTransitions: Activity.() -> Unit = {
-            if (Build.VERSION.SDK_INT >= 34) {
-                overrideActivityTransition(
-                    AppCompatActivity.OVERRIDE_TRANSITION_OPEN,
-                    android.R.anim.fade_in,
-                    android.R.anim.fade_out
-                )
-                overrideActivityTransition(
-                    AppCompatActivity.OVERRIDE_TRANSITION_CLOSE,
-                    android.R.anim.fade_in,
-                    android.R.anim.fade_out
-                )
-            } else
-                overridePendingTransition(
-                    android.R.anim.fade_in,
-                    android.R.anim.fade_out
-                )
-        }
+    internal class AlreadyCreated(element: Element) : Highlighter(element)
+
+    companion object {
+
+        private var delayHandler: Handler? = null
 
         private var instance: Highlighter? = null
 
-        fun cancelIntent(context: Context) = Intent(context, Dummy::class.java).apply {
-            addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            putExtra(Dummy.EXIT_FLAG, true)
-        }
+        val isVisible: Boolean
+            get() = instance != null
 
         fun cancel(context: Context) {
-            if (instance != null)
-                context.startActivity(cancelIntent(context))
+            when (val instance = instance) {
+                is AsActivity -> instance.cancel(context)
+                is AsDecor -> onClose(context as Activity, withIntent = true)
+
+                else -> {}
+            }
+            instance = null
+            delayHandler?.removeCallbacksAndMessages(null)
+            delayHandler = null
         }
 
-        internal fun newInstance(element: Element): Highlighter {
-            val highlighter = Highlighter(element)
-            instance = highlighter
+        internal fun newInstanceForActivity(element: Element): Highlighter {
+            if (instance is AsActivity)
+                return AlreadyCreated(element)
+            else
+                cancel(element.context)
+            val highlighter = AsActivity(element)
+            this.instance = highlighter
             return highlighter
         }
 
-        internal fun bind(activity: Activity) {
-            instance?.delay?.inWholeMilliseconds?.let {
-                Handler(Looper.getMainLooper()).postDelayed({
-                    log("delay over")
-                    instance?.bind(activity)
-                }, it)
-            } ?: instance?.bind(activity)
+        internal fun newInstanceForDecor(element: Element): Highlighter {
+            if (instance is AsDecor)
+                return AlreadyCreated(element)
+            else
+                cancel(element.context)
+            val highlighter = AsDecor(element)
+            this.instance = highlighter
+            return highlighter
+        }
+
+        internal fun bind(root: Any) {
+            instance?.let { instance ->
+                instance.delay?.inWholeMilliseconds?.let { delay ->
+                    log("highlight after delay ${instance.delay}")
+                    delayHandler = Handler(Looper.getMainLooper())
+                    delayHandler?.postDelayed({
+                        log("delay over")
+                        bind(instance, root)
+                    }, delay)
+                } ?: bind(instance, root)
+            }
+        }
+
+        private fun bind(instance: Highlighter, root: Any) {
+            log("highlight with note ${instance.note}")
+            when (instance) {
+                is AsActivity -> instance.bind(root as Activity)
+                is AsDecor -> instance.bind(root as ViewGroup)
+
+                else -> {}
+            }
         }
 
         internal fun onClose(context: Context, withIntent: Boolean = false) {
             if (withIntent)
                 instance?.note?.onClickListener?.invoke(ClickResult.cancel)
-            if (context is Activity) {
+            if (instance is AsActivity && context is Dummy)
                 context.finish()
-                instance = null
-            }
+            if (instance is AsDecor && context is Activity)
+                (instance as AsDecor).cancel(context)
+            instance = null
         }
     }
 
-    private var note: ExplanatoryNote? = null
-
-    private var delay: Duration? = null
-
     infix fun with(note: ExplanatoryNote): Highlighter {
-        log("highlight with note $note")
         this.note = note
         return this
     }
 
     infix fun after(delay: Duration): Highlighter {
-        log("highlight after delay $delay")
         this.delay = delay
         return this
-    }
-
-    private fun setTheme(activity: Activity) {
-        overrideTransitions(activity)
-        note?.themeResId?.let {
-            activity.setTheme(it)
-        }
-    }
-
-    private fun bind(activity: Activity) {
-        val root = Overlay(activity)
-        root.highlight(element)
-        root.setOnClickListener(null as? ClickListener)
-        activity.setContentView(root)
-        if (delay != null) {
-            root.alpha = 0f
-            root.animate().alpha(1f).start()
-        }
-        setTheme(activity)
-        note?.init(root)
     }
 }

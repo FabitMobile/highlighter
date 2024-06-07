@@ -6,4 +6,5 @@
     </style>
 
     <style name="Theme.Highlighter" parent="Base.Theme.Highlighter" />
+    <style name="Theme.Highlighter.Test" parent="Theme.MaterialComponents.Light.NoActionBar" />
 </resources>

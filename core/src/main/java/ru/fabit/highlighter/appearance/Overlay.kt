@@ -21,13 +21,15 @@ import ru.fabit.highlighter.ClickResult
 import ru.fabit.highlighter.Element
 import ru.fabit.highlighter.Highlighter
 import ru.fabit.highlighter.R
+import ru.fabit.highlighter.internal.Dummy
 import ru.fabit.highlighter.internal.afterMeasured
 import ru.fabit.highlighter.internal.getDisplaySize
 import ru.fabit.highlighter.internal.log
 
 class Overlay(context: Context) : RelativeLayout(context) {
     private val size: PointF = (context as Activity).windowManager.getDisplaySize()
-    private val backgroundColor = ContextCompat.getColor(context, R.color.highlighter_overlay_background)
+    private val backgroundColor =
+        ContextCompat.getColor(context, R.color.highlighter_overlay_background)
     private val paintBackground = Paint().apply {
         color = backgroundColor
     }
@@ -107,11 +109,13 @@ class Overlay(context: Context) : RelativeLayout(context) {
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        val insets = WindowInsetsCompat.toWindowInsetsCompat(rootWindowInsets)
-            .getInsets(WindowInsetsCompat.Type.statusBars() or WindowInsetsCompat.Type.navigationBars())
-        topInset = insets.top.toFloat()
-        bottomInset = insets.bottom.toFloat()
-        (context as Activity).window.statusBarColor = backgroundColor
+        if (context is Dummy) {
+            val insets = WindowInsetsCompat.toWindowInsetsCompat(rootWindowInsets)
+                .getInsets(WindowInsetsCompat.Type.statusBars() or WindowInsetsCompat.Type.navigationBars())
+            topInset = insets.top.toFloat()
+            bottomInset = insets.bottom.toFloat()
+            (context as Activity).window.statusBarColor = backgroundColor
+        }
     }
 
     override fun onDraw(canvas: Canvas) {
