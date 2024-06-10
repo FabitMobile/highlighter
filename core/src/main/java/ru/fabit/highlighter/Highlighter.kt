@@ -40,20 +40,16 @@ sealed class Highlighter(
         }
 
         internal fun newInstanceForActivity(element: Element): Highlighter {
-            if (instance is AsActivity)
+            if (isVisible)
                 return AlreadyCreated(element)
-            else
-                cancel(element.context)
             val highlighter = AsActivity(element)
             this.instance = highlighter
             return highlighter
         }
 
         internal fun newInstanceForDecor(element: Element): Highlighter {
-            if (instance is AsDecor)
+            if (isVisible)
                 return AlreadyCreated(element)
-            else
-                cancel(element.context)
             val highlighter = AsDecor(element)
             this.instance = highlighter
             return highlighter
@@ -74,9 +70,9 @@ sealed class Highlighter(
 
         private fun bind(instance: Highlighter, root: Any) {
             log("highlight with note ${instance.note}")
-            when (instance) {
-                is AsActivity -> instance.bind(root as Activity)
-                is AsDecor -> instance.bind(root as ViewGroup)
+            when (root) {
+                is Dummy -> (instance as? AsActivity)?.bind(root)
+                is ViewGroup -> (instance as? AsDecor)?.bind(root)
 
                 else -> {}
             }
