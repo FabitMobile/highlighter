@@ -1,5 +1,8 @@
 package ru.fabit.highlighter.internal
 
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import android.graphics.Point
 import android.graphics.PointF
 import android.os.Build
@@ -30,4 +33,18 @@ internal fun WindowManager.getDisplaySize(): PointF {
         defaultDisplay.getRealSize(size)
         size
     }.toPointF()
+}
+
+internal fun Context?.findActivity(): Activity? {
+    if (this == null) {
+        return null
+    } else if (this is ContextWrapper) {
+        return if (this is Activity) {
+            this
+        } else {
+            baseContext.findActivity()
+        }
+    }
+
+    return null
 }
