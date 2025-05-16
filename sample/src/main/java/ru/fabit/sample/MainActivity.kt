@@ -22,9 +22,13 @@ class MainActivity : AppCompatActivity() {
 
         val text = findViewById<TextView>(R.id.textView)
         val button = findViewById<View>(R.id.button)
+        val button2 = findViewById<View>(R.id.button2)
 
         button.setOnClickListener {
             highlightButton(button, text)
+        }
+        button2.setOnClickListener {
+            highlightButton(button2, text)
         }
     }
 

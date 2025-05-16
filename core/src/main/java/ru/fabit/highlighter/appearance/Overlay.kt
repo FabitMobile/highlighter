@@ -7,7 +7,6 @@ import android.graphics.Paint
 import android.graphics.PointF
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
-import android.graphics.Rect
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -92,9 +91,7 @@ class Overlay(context: Context) : RelativeLayout(context) {
             it.updateLayoutParams<LayoutParams> {
                 topMargin -= topInset.toInt()
             }
-            val pos = Rect()
-            it.getGlobalVisibleRect(pos)
-            if (pos.bottom + bottomInset + originalMarginBottom >= size.y) {
+            if (it.bottom + bottomInset + originalMarginBottom >= size.y) {
                 it.updateLayoutParams<LayoutParams> {
                     addRule(ALIGN_PARENT_BOTTOM)
                     topMargin = originalMarginTop
