@@ -112,6 +112,7 @@ class Overlay(context: Context) : RelativeLayout(context) {
             topInset = insets.top.toFloat()
             bottomInset = insets.bottom.toFloat()
             (context as Activity).window.statusBarColor = backgroundColor
+            (context as Activity).window.navigationBarColor = backgroundColor
         }
     }
 
